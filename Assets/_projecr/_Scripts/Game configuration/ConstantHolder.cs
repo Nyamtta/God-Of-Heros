@@ -17,6 +17,14 @@ namespace Rodems
         MoveSpeed
     }
 
+    public enum EnemyAnimationsType
+    {
+        Idle,
+        MoveSpeed,
+        DeathTrigger,
+        HandAttackTrigger
+    }
+
     public enum AttackDirectionType
     {
         RadiusAttack,
@@ -25,8 +33,9 @@ namespace Rodems
 
     public enum PlayerAttackType
     {
+        NotAttacking,
         JumpAttack,
-        SplashAttack
+        swingAttack
     }
 
     [Serializable]

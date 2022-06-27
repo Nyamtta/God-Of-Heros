@@ -16,7 +16,8 @@ namespace Rodems
 
         public void play(PlayerAnimationsType playerAnimationsType, float speed = 0)
         {
-            resetAllFloadValue();
+            if (speed == 0)
+                resetAllFloadValue();
 
             switch (playerAnimationsType)
             {
@@ -51,6 +52,5 @@ namespace Rodems
         {
             _animator.SetTrigger(PlayerAnimationsType.JumpAttackTrigger.ToString());
         }
-
     }
 }

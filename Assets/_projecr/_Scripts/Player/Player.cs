@@ -12,14 +12,15 @@ namespace Rodems
         [SerializeField] private PlayerSettings _settings;
         [SerializeField] private Animator _animator;
         [SerializeField] private NavMeshAgent _navMeshAgent;
-        [SerializeField] private SphereCollider _attackSphereCollider;
         [SerializeField] private PlayerAnimatorEvents _animatorEvents;
         [SerializeField] private TriggerHandler _triggerHandler;
 
+        private bool _canAttac;
+        private bool _isMoving;
+        private PlayerAttackType _attackType;
+        private Vector3 _movePoint;
         private PlayerAnimator _animatorContriller;
-        private Camera _mainCamera;
-        private bool _canMove = true;
-        private bool _canAttack = true;
+        private StateMachine _stateMachine;
 
         private void OnValidate()
         {
@@ -29,97 +30,49 @@ namespace Rodems
 
         private void Start()
         {
+            _stateMachine = new StateMachine();
             _animatorContriller = new PlayerAnimator(_animator);
-            _mainCamera = Camera.main;
-            _triggerHandler.onTriggerEnter += onTriggerEnter;
-            _animatorEvents.splashAttack += simpleAttack;
+
+            PlayerMoveState moveState = new PlayerMoveState(_animatorContriller, _navMeshAgent, this);
+            PlayerIdleState idleState = new PlayerIdleState(this, Camera.main, _settings);
+            PlayerJumpAttackState jumpAttackState = new PlayerJumpAttackState(
+                 this, _animatorEvents, _settings.getAttackSettings(PlayerAttackType.JumpAttack), _animatorContriller);
+            PlayerSwingAttackState swingAttackState = new PlayerSwingAttackState();
+
+            _stateMachine.AddTransition(idleState, moveState, () => _isMoving);
+            _stateMachine.AddTransition(moveState, idleState, () => !_isMoving);
+            _stateMachine.AddAnyTransition(swingAttackState, () => PlayerAttackType.swingAttack == CheckAttackInput());
+            _stateMachine.AddAnyTransition(jumpAttackState, () => PlayerAttackType.JumpAttack == CheckAttackInput());
+
+            _stateMachine.SetState(idleState);
         }
 
-        private void Update()
+        private void Update() => _stateMachine.Tick();
+
+        public void setMovePoint(Vector3 movePoint)
         {
-            if (Input.GetMouseButtonDown(0))
-                moveToTarget();
-
-            if (Input.GetKeyDown(KeyCode.Space) && _canAttack)
-                splashAttackAction();
+            _movePoint = movePoint;
+            _isMoving = true;
         }
 
-        private void moveToTarget()
+        public void setMoving(bool isMoving) => _isMoving = isMoving;
+
+        public PlayerAttackType CheckAttackInput()
         {
-            if(!_canMove)
-                return;
+            _attackType = PlayerAttackType.NotAttacking;
 
-            _animatorContriller.play(PlayerAnimationsType.MoveSpeed, 1f);
-            Ray ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
+            if (Input.GetKeyDown(KeyCode.Space) && _canAttac)
+                _attackType = PlayerAttackType.JumpAttack;
+            else if(Input.GetKeyDown(KeyCode.Q) && _canAttac)
+                _attackType = PlayerAttackType.swingAttack;
 
-            if(Physics.Raycast(ray, out hit, 1000, _settings.groundLayer))
-                StartCoroutine(moveRoutine(hit.point));
+            return _attackType;
         }
 
-        private void splashAttackAction()
-        {
-            _navMeshAgent.isStopped = true;
-            _navMeshAgent.destination = transform.position;
-            _canAttack = false;
-            _canMove = false;
-            _animatorContriller.play(PlayerAnimationsType.SplashAttackTrigger);
-        }
+        public void setCanAttack(bool canAttack) => _canAttac = canAttack;
 
-        private void simpleAttack()
-        {
-            AttackSettings settings = _settings.getAttackSettings(PlayerAttackType.SplashAttack);
-            StartCoroutine(attackAction(settings.duration, settings.radius));
-        }
+        public Vector3 getPosition() => transform.position;
 
-        private void onTriggerEnter(GameObject obj)
-        {
-            if(obj.TryGetComponent(out Enemy enemy))
-                enemy.takeDamege(1f);
-        }
-
-        private IEnumerator attackAction(float duretion, float radius)
-        {
-            float lertTime = 0;
-            float timer = 0;
-
-            while (lertTime < 1f)
-            {
-                timer += Time.deltaTime;
-                lertTime = timer / duretion;
-                _attackSphereCollider.radius = Mathf.Lerp(0, radius, lertTime);
-
-                yield return null;
-            }
-
-            _navMeshAgent.isStopped = false;
-            _attackSphereCollider.radius = 0f;
-            _canMove = true;
-            _canAttack = true;
-        }
-
-        private IEnumerator moveRoutine(Vector3 targetPoint)
-{
-            _navMeshAgent.SetDestination(targetPoint);
-            yield return null;
-
-            Vector3 previousPosition = transform.position;
-            Vector3 curMove;
-            float curSpeed;
-            float speedInPercentage;
-
-            while (_navMeshAgent.hasPath)
-            {
-                curMove = transform.position - previousPosition;
-                curSpeed = curMove.magnitude / Time.deltaTime;
-                previousPosition = transform.position;
-                speedInPercentage = curSpeed / _navMeshAgent.speed;
-
-                _animatorContriller.play(PlayerAnimationsType.MoveSpeed, speedInPercentage);
-                yield return null;
-            }
-            
-            _animatorContriller.play(PlayerAnimationsType.Idle);
-        }
+        public Vector3 getMovePoint() => _movePoint;
     }
 }
