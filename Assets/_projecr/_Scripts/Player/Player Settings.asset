@@ -18,12 +18,34 @@ MonoBehaviour:
     m_Bits: 64
   _attackSettings:
   - directionType: 1
-    damage: 5
-    radius: 3
-    duration: 0.5
-    attackType: 0
-  - directionType: 1
+    attackAction: {fileID: 1114014609856108044, guid: eb1dedbc920ebd140850a47ce8454c66,
+      type: 3}
     damage: 5
     radius: 3
     duration: 0.5
     attackType: 1
+    animationsType: 1
+  - directionType: 1
+    attackAction: {fileID: 1114014609856108044, guid: eb1dedbc920ebd140850a47ce8454c66,
+      type: 3}
+    damage: 10
+    radius: 3
+    duration: 0.5
+    attackType: 2
+    animationsType: 2
+  - directionType: 0
+    attackAction: {fileID: 9126526135239186643, guid: c673e0a98c41ce044836ab42ce60d981,
+      type: 3}
+    damage: 5
+    radius: 2
+    duration: 0.5
+    attackType: 4
+    animationsType: 4
+  - directionType: 0
+    attackAction: {fileID: 9126526135239186643, guid: a35fd5887ae42c5498ded96fb4cac438,
+      type: 3}
+    damage: 5
+    radius: 2
+    duration: 0.5
+    attackType: 3
+    animationsType: 3

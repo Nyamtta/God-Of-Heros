@@ -16,7 +16,7 @@ namespace Rodems
         public LayerMask groundLayer { get => _groundLayer; private set => _groundLayer = value; }
         public List<PlayerAttackSettings> attackSettings { get => _attackSettings; set => _attackSettings = value; }
 
-        public AttackSettings getAttackSettings(PlayerAttackType attackType)
+        public PlayerAttackSettings getAttackSettings(PlayerAttackType attackType)
         {
             foreach (var attack in _attackSettings)
             {

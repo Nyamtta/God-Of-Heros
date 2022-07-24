@@ -13,7 +13,9 @@ namespace Rodems
     {
         Idle,
         JumpAttackTrigger,
-        SplashAttackTrigger,
+        HandOnGrounAttackTrigger,
+        HitLowUp,
+        SwingAttackTrigger,
         MoveSpeed
     }
 
@@ -25,23 +27,20 @@ namespace Rodems
         HandAttackTrigger
     }
 
-    public enum AttackDirectionType
-    {
-        RadiusAttack,
-        CircledAttacl
-    }
-
     public enum PlayerAttackType
     {
         NotAttacking,
         JumpAttack,
-        swingAttack
+        HandOnGround,
+        LowUp,
+        Swing,
+        Ultimate
     }
 
     [Serializable]
     public class AttackSettings
     {
-        public AttackDirectionType directionType;
+        public AttackAction attackAction;
         public float damage;
         public float radius;
         public float duration;
@@ -51,5 +50,6 @@ namespace Rodems
     public class PlayerAttackSettings : AttackSettings
     {
         public PlayerAttackType attackType;
+        public PlayerAnimationsType animationsType;
     }
 }
